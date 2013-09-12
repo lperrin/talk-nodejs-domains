@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>reveal.js - The HTML Presentation Framework</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/didier.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+		<div class="slides">
+		    <section>
+		        <h1>Save the day with node.js domains</h1>
+		    </section>
+		    <section>
+		        <h2>Laurent Perrin</h2>
+		<ul class="no-bullets">
+		    <li>
+		        <img src="https://s3.amazonaws.com/media-p.slid.es/uploads/lperrin/images/88141/Octocat.jpg" style="width: 52px; height: 52px;">
+		        <a href="https://github.com/lperrin">github.com/lperrin</a>
+		    </li>
+
+		    <li>
+		        <img src="https://s3.amazonaws.com/media-p.slid.es/uploads/lperrin/images/88470/twitter-bird-blue-on-white.png" style="width: 52px; height: 52px;">
+		        <a href="https://twitter.com/l_perrin">@l_perrin</a>
+		    </li>
+
+		    <li>
+		    </li>
+
+		    <li>&nbsp;</li>
+		    <li>CTO at frontapp.com, <strong>♥</strong> node.js &amp; AngularJS</li>
+		</ul>
+
+
+
+
+
+		</section>
+		    <section>
+		        <h2>Let's talk about exceptions</h2>
+		    </section>
+		    <section>
+		        <h2>1. Runtime error</h2>
+		        <div>
+		            <br>
+		        </div>
+		        <div>
+		<pre>/opt/git/front-prod/server/pumps/message_template.js:71
+    name: this.peer.name,
+                   ^
+TypeError: Cannot read property 'name' of undefined
+    at MessageTemplate.toContact (/opt/git/front-prod/server/pumps/message_template.js:71:20)
+    at /opt/git/front-prod/server/pumps/message_template.js:48:26
+    at fn (/opt/git/front-prod/node_modules/async/lib/async.js:579:34)
+    at Object._onImmediate (/opt/git/front-prod/node_modules/async/lib/async.js:495:34)
+    at processImmediate (timers.js:330:15)</pre>
+		    </div>
+		    <br>
+		    <div>The stack points to the source of the error. Scary, but easy to fix.</div>
+		    <div>
+		        <br>
+		    </div>
+		    <div>
+		        <span style="font-size: 29.441884994506836px; font-style: normal; font-variant: normal;">Pain level:&nbsp;<b>3</b>
+		    </span>
+		    <b style="font-size: 29.441884994506836px; font-style: normal; font-variant: normal;">/10</b>
+		    <br>
+		</div>
+		</section>
+		<section>
+		    <section>
+		        <h2>2. Runtime error without context</h2>
+		        <div>
+		            <br>
+		        </div>
+		        <div>
+		<pre>/Users/laurent/dev/talk_domains/test.js:4
+    done();
+    ^
+TypeError: undefined is not a function
+    at null._onTimeout (/Users/laurent/dev/talk_domains/test.js:4:5)
+    at Timer.listOnTimeout [as ontimeout] (timers.js:110:15)</pre>
+		    </div>
+		    <br>
+		</section>
+		<section>
+		<pre><code>function doSomething(done) {
+  setTimeout(function () {
+    console.log('did something');
+    done();
+  }, 1000);
+}
+
+doSomething(/* missing */);</code></pre>
+		<br>
+		<div>The stack looks incomplete and doesn't show the caller of <code>doSomething</code> (where the error is located). We'll talk about that in a minute.</div>
+		<div>
+		    <br>
+		</div>
+		<div>
+		    <span style="font-size: 29.441884994506836px; font-style: normal; font-variant: normal;">Pain level:&nbsp;<b>7</b>
+		</span>
+		<b style="font-size: 29.441884994506836px; font-style: normal; font-variant: normal;">/10</b>
+		<br>
+		</div>
+		</section>
+		</section>
+		<section>
+		<h2>3. EventEmitter error</h2>
+		<div>
+		    <br>
+		</div>
+		<pre>/opt/git/front-prod/node_modules/longjohn/dist/longjohn.js:181
+        throw e;
+              ^
+Error: read ECONNRESET
+    at errnoException (net.js:901:11)
+    at onread (net.js:556:19)</pre>
+		<br>
+		<p>When you don't listen to&nbsp;<span style="color: #47a04a; font-family: monospace; text-align: left; white-space: pre-wrap;">'error'</span>
+		<span>&nbsp;events, they turn into exceptions.</span>
+		    </p>
+		<p>
+		<br>
+		</p>
+		<p>
+		<span style="font-size: 29.441884994506836px; font-style: normal; font-variant: normal;">Pain level: <b>9</b>
+		</span>
+		<b style="font-size: 29.441884994506836px; font-style: normal; font-variant: normal;">/10</b>
+		<br>
+		</p>
+
+		</section>
+		<section>
+      <section>
+		    <h2>4. Nothing at all!</h2>
+		    <div>
+		        <br>
+		    </div>
+		    <p>Your app forgets about a connection and the browser loads forever:</p>
+		    <p>
+		    <br>
+		</p>
+		<pre><code>function doSomethingElse(done) {
+  someBackend.load(function (err, data) {
+    if (err) {
+      console.log('Something happened', err);
+      // you forgot to call the callback
+      return;
+    }
+
+    done(null, data);
+  })
+}</code></pre>
+		<br>
+		<div>Pain level: <b>10/10</b>
+		</div>
+		</section>
+    <section>
+      <div>This is a real problem that can be a real headache in real-world projects. Unfortunately, domains won't with that.</div>
+      <br>
+      <div>My solution is to assert the type of parameters in important functions.</div>
+    </section>
+    </section>
+		<section>
+		    <section>
+		<h2>Wait, where's my stack ?</h2>
+		<div>
+		    <br>
+		</div>
+		<div>
+		<pre><code>function doSomething(done) {
+  console.log('about to do something');
+  setTimeout(function () {
+    console.log('did something');
+    done();
+  }, 1000);
+}
+
+doSomething(/* missing */);</code></pre>
+		</div>
+		<br>
+
+		</section>
+		    <section>
+		<pre>function doSomething(done) {
+  <b><font color="#6d9eeb">console.log('about to do something');</font></b>
+  setTimeout(function () {
+    console.log('did something');
+    done();
+  }, 1000);
+}
+
+doSomething(/* missing */);</pre>
+		<br>
+
+		</section>
+		    <section>
+		        <div>
+		    <pre style="font-style: normal; font-variant: normal; width: 859.375px;">
+function doSomething(done) {
+  console.log('about to do something');<font color="#6fa8dc"><b>
+  setTimeout(</b></font><font color="#666666">function () {
+    console.log('did something');
+    done();
+  }</font><font color="#6fa8dc"><b>, 1000);</b></font>
+}
+
+doSomething(/* missing */);</pre>
+		    </div>
+		    <br>
+        <div>When node.js executes <code>setTimeout</code>, the callback is just a parameter and is not executed. After that, the function returns and unwinds the stack.</div>
+
+		</section>
+		    <section>
+		<pre><font color="#666666">function doSomething(done) {
+  console.log('about to do something');
+  setTimeout(</font><font color="#9fc5e8"><b>function () {
+    console.log('did something');
+    done();
+  }</b></font><font color="#666666">, 1000);
+}
+
+doSomething(/* missing */);</font></pre>
+		    <br>
+        <div>When node.js finally executes the callback, <code>setTimeout</code> starts a new stack.</div>
+        <br>
+		    <div>Check <a href="https://github.com/mattinsler/longjohn">longjohn</a>.</div>
+		</section>
+		</section>
+		<section>
+		    <h2>Countermeasures</h2>
+		    <br>
+		</section>
+		<section>
+		<h2>try/catch</h2>
+		<p>
+		<br>
+		</p>
+		<pre><font color="#666666">function doSomething(done) {
+  try {
+    setTimeout(</font>function () {
+      console.log('did something');
+        done();
+      }<font color="#666666">, 1000);
+  } catch(e) {
+    console.log('not executed');
+  }
+}
+
+doSomething(/* missing */);</font></pre>
+		<br>
+
+
+
+		<div>As before, the surrounding function no longer exists when <code>setTimeout</code> executes. The <code>try/catch</code> will not catch the exception.</div>
+		</section>
+		<section>
+		    <h2>proc.on('uncaughtException')</h2>
+		    <div>
+		        <br>
+		    </div>
+		    <div>Will prevent your app from crashing, but you still have no idea where the error came from.</div>
+		    <div>
+		        <br>
+		    </div>
+		    <div>You probably leaked objects, and your app is now in a brittle state so you should terminate the process quickly.</div>
+		</section>
+		<section>
+		    <h2>Domains!</h2>
+		    <div>
+		        <br>
+		    </div>
+		    <p>Added in node.js 0.8.0 (June 2012)</p>
+		    <p>
+		    <br>
+		</p>
+		<p>"a way to join multiple different IO actions, so that you can have some context when an error occurs."</p>
+		<p>
+		<br>
+		</p>
+		<p>The way I see it: the active domain is passed as a hidden parameter in function calls.</p>
+    <br>
+    <p>(at this point, I demoed the code)</p>
+		</section>
+		<section>
+		    <section>
+		        <h2>What's wrong with MySQL ?</h2>
+		        <div>
+		            <br>
+		        </div>
+		        <p>After calling MySQL, we end up in a different domain.</p>
+		        <p>
+		    </p>
+		    <p>We are not even able to send a 500 error to client.</p>
+		</section>
+        <!--
+		    <section>
+		        <h2>
+		            <br>
+		        </h2>
+		        <img src="https://s3.amazonaws.com/media-p.slid.es/uploads/lperrin/images/88374/Screen_Shot_2013-09-11_at_16.34.40.png">
+		    </section>
+        -->
+		</section>
+		<section>
+		    <section>
+		        <h2>MySQL is a sequential protocol</h2>
+		<img src="https://s3.amazonaws.com/media-p.slid.es/uploads/lperrin/images/88386/mysql_diag1.png" style="width: 378.25180399175923px; height: 578.7260625720085px; max-height: none; max-width: none;">
+		</section>
+		        <section>
+		            <h2>Other requests wait in a queue</h2>
+		<img src="https://s3.amazonaws.com/media-p.slid.es/uploads/lperrin/images/88390/mysql_diag2.png">
+		</section>
+		<section>The driver runs in the domain that created the connection.<div>
+		<br>
+		</div>
+		<div>Solution: <code>preserveDomain</code>
+		</div>
+		<div>
+		    <font face="monospace">
+		        <br>
+		</font>
+
+		<pre><code>function preserveDomain(fun) {
+  var d = domain.active;
+
+  return function () {
+    var args = arguments;
+
+    d.run(function () {
+      fun.apply(null, args);
+    });
+  };
+}</code></pre>
+
+		</div>
+		    <br>
+        <div>Make sure you protect your domains when calling 3rd party modules.</div>
+
+		</section>
+		    </section>
+		    <section>
+		<h2>Other Stuff</h2>
+		<div>
+		    <br>
+		</div>
+		<p>Catching error in usafe modules without patching them</p>
+		<p>
+		<br>
+		</p>
+		<pre><code>domain.create().on('error', function (err) {
+  // handle error
+}).run(unsafeModule);</code></pre>
+		<br>
+		<div>Logging with elapsed time</div>
+		<div>
+		    <br>
+		</div>
+		<div>
+		<pre><code>var d = domain.create();</code><code>d.start = Date.now();</code><code>d.log = function (msg) {</code><code>  console.log(Date.now() - d.start, msg);</code><code>};</code></pre>
+		</div>
+		    <br>
+		</section>
+		<section>
+		    <h2>Attach objects to domain</h2>
+		    <div>
+		        <br>
+		        Find out about current request, current user with <code>domain.active</code>.
+		    </div>
+		    <br>
+		    <div>
+		<pre><code> exports.wrapFetch = function (Resource, fetcher) {
+  var type = Resource.prototype.className;
+
+  return function (id, done) {
+    var d = domain.active,
+        key = type + '/' + id;
+
+    d.ensureNotGarbaged();
+
+    var cached = d.reqcache[key],
+        pending = d.pendings[key];
+
+    if (cached)
+      return done(null, cached);
+
+    if (pending)
+      return pending.push(done);
+
+    pending = [done];
+    d.pendings[key] = pending;
+
+    fetcher(id, function (err, resource) {
+      d.ensureNotGarbaged();
+
+      if (!err)
+        d.reqcache[key] = resource;
+
+      // destroy the pending list now in case the domain is garbaged by a callback
+      delete d.pendings[key];
+
+      // finally, notify all pending requests
+      _(pending).each(function (cb) {
+        cb(err, resource);
+      });
+    });
+  };
+};</code></pre>
+		</div>
+		<br>
+		<div>Works for me in production, but <code>domain.active</code> if undocumented.</div>
+		</section>
+		<section>
+		    <h2>Thank you!</h2>
+		    <div>
+		        <br>
+		    </div>
+		    <div>
+		        <br>
+		    </div>
+		    <p>Laurent Perrin</p>
+		    <p>github.com/lperrin, @l_perrin</p>
+		    <p>
+		    <br>
+		</p>
+		<p>frontapp.com</p>
+		<p>
+		<font style="font-size: 24px;">(we're hiring)</font>
+		</p>
+		</section>
+		</div>
+
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
